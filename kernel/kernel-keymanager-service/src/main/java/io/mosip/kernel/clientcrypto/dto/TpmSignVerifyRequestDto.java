@@ -1,6 +1,7 @@
 package io.mosip.kernel.clientcrypto.dto;
 
 
+import io.mosip.kernel.clientcrypto.constant.ClientType;
 import io.mosip.kernel.keymanagerservice.constant.KeymanagerConstant;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -38,8 +39,9 @@ public class TpmSignVerifyRequestDto {
     private String publicKey;
 
     /**
-     * Flag to identify TPM or Non-TPM validations
+     * Flag to identify Client type
      */
-    @ApiModelProperty(notes = "Defaults to TPM, set to false for non-tpm based verification", required = false)
-    private boolean isTpm;
+    @ApiModelProperty(notes = "Default verifies based on public key to identify TPM Implementation," +
+            "For non-TPM instances set this value explicitly", required = false)
+    private ClientType clientType;
 }

@@ -2,6 +2,7 @@ package io.mosip.kernel.clientcrypto.service.impl;
 
 import io.mosip.kernel.clientcrypto.constant.ClientCryptoErrorConstants;
 import io.mosip.kernel.clientcrypto.constant.ClientCryptoManagerConstant;
+import io.mosip.kernel.clientcrypto.constant.ClientType;
 import io.mosip.kernel.clientcrypto.exception.ClientCryptoException;
 import io.mosip.kernel.clientcrypto.service.spi.ClientCryptoService;
 import io.mosip.kernel.core.crypto.spi.CryptoCoreSpec;
@@ -95,16 +96,20 @@ public class ClientCryptoFacade {
         return clientCryptoService;
     }
 
-    public boolean validateSignature(byte[] publicKey, byte[] signature, byte[] actualData) {
+    public boolean validateSignature(ClientType clientType, byte[] publicKey, byte[] signature, byte[] actualData) {
         if(!isTPMKey(publicKey)) {
             LOGGER.warn(ClientCryptoManagerConstant.SESSIONID, ClientCryptoManagerConstant.INITIALIZATION, ClientCryptoManagerConstant.EMPTY,
                     "USING LOCAL CLIENT SECURITY USED TO SIGN DATA, IGNORE IF THIS IS NON-PROD ENV");
+            switch (clientType) {
+                case ANDROID:
+                    return AndroidClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
+            }
             return LocalClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
         }
         return TPMClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
     }
 
-    public byte[] encrypt(byte[] publicKey, byte[] dataToEncrypt) {
+    public byte[] encrypt(ClientType clientType, byte[] publicKey, byte[] dataToEncrypt) {
         SecretKey secretKey = getSecretKey();
         byte[] iv = generateRandomBytes(ivLength);
         byte[] aad = generateRandomBytes(aadLength);
@@ -115,7 +120,14 @@ public class ClientCryptoFacade {
             LOGGER.warn(ClientCryptoManagerConstant.SESSIONID, ClientCryptoManagerConstant.INITIALIZATION, ClientCryptoManagerConstant.EMPTY,
                     "USING LOCAL CLIENT SECURITY USED TO ENCRYPT DATA, IGNORE IF THIS IS NON-PROD ENV");
             LocalClientCryptoServiceImpl.cryptoCore = this.cryptoCore;
-            encryptedSecretKey = LocalClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+            switch (clientType) {
+                case ANDROID:
+                    encryptedSecretKey = AndroidClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+                    break;
+                default:
+                    encryptedSecretKey = LocalClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+                    break;
+            }
         }
         else {
             encryptedSecretKey = TPMClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
