@@ -68,7 +68,7 @@ public class AndroidClientCryptoServiceImpl implements ClientCryptoService {
 
     public static boolean validateSignature(byte[] public_key, byte[] signature, byte[] actualData)
             throws ClientCryptoException {
-        LOGGER.info("AndroidClientSecurity validate signature invoked");
+        LOGGER.debug("AndroidClientSecurity validate signature invoked");
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(public_key);
             KeyFactory kf = KeyFactory.getInstance(ALGORITHM);
@@ -86,11 +86,13 @@ public class AndroidClientCryptoServiceImpl implements ClientCryptoService {
 
 
     public static byte[] asymmetricEncrypt(byte[] public_key, byte[] dataToEncrypt) throws ClientCryptoException {
+        LOGGER.debug("AndroidClientSecurity asymmetricEncrypt invoked");
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(public_key);
             KeyFactory kf = KeyFactory.getInstance(ALGORITHM);
             PublicKey publicKey = kf.generatePublic(keySpec);
 
+            //Only SHA-1 is the supported MGF digest currently
             final Cipher cipher_asymmetric = Cipher.getInstance(ASYMMETRIC_ALGORITHM);
             cipher_asymmetric.init(Cipher.ENCRYPT_MODE, publicKey, new OAEPParameterSpec(
                     ASYMMETRIC_ALGO_MD, ASYMMETRIC_ALGO_MGF, MGF1ParameterSpec.SHA1, PSource.PSpecified.DEFAULT));

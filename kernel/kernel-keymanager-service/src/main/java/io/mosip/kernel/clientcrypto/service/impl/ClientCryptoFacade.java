@@ -96,41 +96,48 @@ public class ClientCryptoFacade {
         return clientCryptoService;
     }
 
+    public boolean validateSignature(byte[] publicKey, byte[] signature, byte[] actualData) {
+       return validateSignature(ClientType.LOCAL, publicKey, signature, actualData);
+    }
+
+    public byte[] encrypt(byte[] publicKey, byte[] dataToEncrypt) {
+        return encrypt(ClientType.LOCAL, publicKey, dataToEncrypt);
+    }
+
     public boolean validateSignature(ClientType clientType, byte[] publicKey, byte[] signature, byte[] actualData) {
-        if(!isTPMKey(publicKey)) {
-            LOGGER.warn(ClientCryptoManagerConstant.SESSIONID, ClientCryptoManagerConstant.INITIALIZATION, ClientCryptoManagerConstant.EMPTY,
-                    "USING LOCAL CLIENT SECURITY USED TO SIGN DATA, IGNORE IF THIS IS NON-PROD ENV");
-            switch (clientType) {
-                case ANDROID:
-                    return AndroidClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
-            }
-            return LocalClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
+        clientType = isTPMKey(publicKey) ? ClientType.TPM : clientType;
+
+        switch (clientType == null ? clientType.LOCAL : clientType) {
+            case TPM:
+                return TPMClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
+            case ANDROID:
+                return AndroidClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
         }
-        return TPMClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
+        LOGGER.warn("USING LOCAL CLIENT SECURITY USED TO SIGN DATA, IGNORE IF THIS IS NON-PROD ENV");
+        return LocalClientCryptoServiceImpl.validateSignature(publicKey, signature, actualData);
     }
 
     public byte[] encrypt(ClientType clientType, byte[] publicKey, byte[] dataToEncrypt) {
+        clientType = isTPMKey(publicKey) ? ClientType.TPM : clientType;
+
         SecretKey secretKey = getSecretKey();
         byte[] iv = generateRandomBytes(ivLength);
         byte[] aad = generateRandomBytes(aadLength);
         byte[] cipher = cryptoCore.symmetricEncrypt(secretKey, dataToEncrypt, iv, aad);
 
         byte[] encryptedSecretKey = null;
-        if(!isTPMKey(publicKey)) {
-            LOGGER.warn(ClientCryptoManagerConstant.SESSIONID, ClientCryptoManagerConstant.INITIALIZATION, ClientCryptoManagerConstant.EMPTY,
-                    "USING LOCAL CLIENT SECURITY USED TO ENCRYPT DATA, IGNORE IF THIS IS NON-PROD ENV");
-            LocalClientCryptoServiceImpl.cryptoCore = this.cryptoCore;
-            switch (clientType) {
-                case ANDROID:
-                    encryptedSecretKey = AndroidClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
-                    break;
-                default:
-                    encryptedSecretKey = LocalClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
-                    break;
-            }
-        }
-        else {
-            encryptedSecretKey = TPMClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+        switch (clientType == null ? clientType.LOCAL : clientType)  {
+            case TPM:
+                encryptedSecretKey = TPMClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+                break;
+            case ANDROID:
+                encryptedSecretKey = AndroidClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+                break;
+            default:
+                LOGGER.warn("USING LOCAL CLIENT SECURITY USED TO ENCRYPT DATA, IGNORE IF THIS IS NON-PROD ENV");
+                LocalClientCryptoServiceImpl.cryptoCore = this.cryptoCore;
+                encryptedSecretKey = LocalClientCryptoServiceImpl.asymmetricEncrypt(publicKey, secretKey.getEncoded());
+                break;
         }
         Objects.requireNonNull(encryptedSecretKey);
         byte[] processedData = new byte[cipher.length+encryptedSecretKey.length+iv.length+aad.length];
@@ -201,7 +208,7 @@ public class ClientCryptoFacade {
             return true;
         } catch (Throwable t) {
             //*** INVALID TPM KEY **** As its noisy, its logged at debug level
-            LOGGER.debug("*** INVALID TPM KEY **** " + ExceptionUtils.getStackTrace(t));
+            LOGGER.debug("*** INVALID TPM KEY **** " , t);
         }
         return false;
     }

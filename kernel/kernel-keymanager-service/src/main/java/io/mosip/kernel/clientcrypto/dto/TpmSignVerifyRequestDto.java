@@ -39,6 +39,13 @@ public class TpmSignVerifyRequestDto {
     private String publicKey;
 
     /**
+     * Flag to identify TPM or Non-TPM validations
+     */
+    @ApiModelProperty(notes = "Defaults to TPM, set to false for non-tpm based verification", required = false)
+    @Deprecated(since = "1.2.1")
+    private boolean isTpm;
+
+    /**
      * Flag to identify Client type
      */
     @ApiModelProperty(notes = "Default verifies based on public key to identify TPM Implementation," +

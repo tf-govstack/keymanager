@@ -79,14 +79,13 @@ public class ClientCryptoControllerTest {
 	}
 
 	@Test
-	@Ignore
-	public void getEncryptDecryptWithLocal() throws Exception {
+	public void getEncryptDecryptWithLocal() {
 		ClientCryptoService clientCryptoService = clientCryptoFacade.getClientSecurity();
 		Assert.assertNotNull(clientCryptoService);
 
 		byte[] localPubKey = clientCryptoService.getEncryptionPublicPart();
 
-		byte[] cipher = clientCryptoFacade.encrypt(ClientType.LOCAL, localPubKey, dataToEncrypt.getBytes());
+		byte[] cipher = clientCryptoFacade.encrypt(null, localPubKey, dataToEncrypt.getBytes());
 
 		byte[] plain = clientCryptoFacade.decrypt(cipher);
 		Assert.assertNotNull(plain);
@@ -94,8 +93,7 @@ public class ClientCryptoControllerTest {
 	}
 
 	@Test
-	@Ignore
-	public void getSignVerifyWithLocal() throws Exception {
+	public void getSignVerifyWithLocal() {
 		ClientCryptoService clientCryptoService = clientCryptoFacade.getClientSecurity();
 		Assert.assertNotNull(clientCryptoService);
 
@@ -104,7 +102,7 @@ public class ClientCryptoControllerTest {
 		byte[] sigBytes = clientCryptoFacade.getClientSecurity().signData(dataToEncrypt.getBytes());
 		Assert.assertNotNull(sigBytes);
 
-		boolean valid = clientCryptoFacade.validateSignature(ClientType.LOCAL, localPubKey, sigBytes, dataToEncrypt.getBytes());
+		boolean valid = clientCryptoFacade.validateSignature(null, localPubKey, sigBytes, dataToEncrypt.getBytes());
 		Assert.assertTrue(valid);
 	}
 
