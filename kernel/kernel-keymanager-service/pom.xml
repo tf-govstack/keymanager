@@ -144,6 +144,10 @@
 
 		<tss.version>0.3.0</tss.version>
 		<cache2k-version>2.4.1.Final</cache2k-version>
+		<springdoc.version>1.5.10</springdoc.version>
+		<jacoco.maven.plugin.version>0.8.5</jacoco.maven.plugin.version>
+		<com.nimbusds.nimbus-jose-jwt.version>9.14</com.nimbusds.nimbus-jose-jwt.version>
+		<com.fasterxml.jackson.core.version>2.12.0</com.fasterxml.jackson.core.version>
 	</properties>
 
 	<dependencies>
@@ -223,6 +227,42 @@
 			<artifactId>cache2k-core</artifactId>
 			<version>${cache2k-version}</version>
 		  </dependency>
+			<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${com.fasterxml.jackson.core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>${com.nimbusds.nimbus-jose-jwt.version}</version>
+		</dependency>
 	</dependencies>
 	
 <distributionManagement>

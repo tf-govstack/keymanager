@@ -13,6 +13,7 @@ import io.mosip.kernel.core.http.RequestWrapper;
 import io.mosip.kernel.core.http.ResponseFilter;
 import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.core.signatureutil.model.SignatureResponse;
+import io.mosip.kernel.signature.dto.JWSSignatureRequestDto;
 import io.mosip.kernel.signature.dto.JWTSignatureRequestDto;
 import io.mosip.kernel.signature.dto.JWTSignatureResponseDto;
 import io.mosip.kernel.signature.dto.JWTSignatureVerifyRequestDto;
@@ -82,7 +83,7 @@ public class SignatureController {
 	}
 
 	/**
-	 * Function to JWT sign data
+	 * Function to do JSON Web Signature(JWS) for the inputted data using RS256 algorithm
 	 * 
 	 * @param requestDto {@link JWTSignatureRequestDto} having required fields.
 	 * @return The {@link JWTSignatureResponseDto}
@@ -109,6 +110,23 @@ public class SignatureController {
 	public ResponseWrapper<JWTSignatureVerifyResponseDto> jwtVerify(@RequestBody @Valid RequestWrapper<JWTSignatureVerifyRequestDto> requestDto) {
 		JWTSignatureVerifyResponseDto signatureResponse = service.jwtVerify(requestDto.getRequest());
 		ResponseWrapper<JWTSignatureVerifyResponseDto> response = new ResponseWrapper<>();
+		response.setResponse(signatureResponse);
+		return response;
+	}
+
+	/**
+	 * Function to do JSON Web Signature(JWS) for the inputted data using inputted algorithm. Default Algorithm PS256.
+	 * 
+	 * @param requestDto {@link JWTSignatureRequestDto} having required fields.
+	 * @return The {@link JWTSignatureResponseDto}
+	 */
+	@ResponseFilter
+	@PreAuthorize("hasAnyRole('ZONAL_ADMIN','GLOBAL_ADMIN','INDIVIDUAL','ID_AUTHENTICATION', 'REGISTRATION_ADMIN', 'REGISTRATION_SUPERVISOR', 'REGISTRATION_OFFICER', 'REGISTRATION_PROCESSOR','PRE_REGISTRATION_ADMIN','RESIDENT','CREDENTIAL_ISSUANCE')")
+	@PostMapping(value = "/jwsSign")
+	public ResponseWrapper<JWTSignatureResponseDto> jwsSign(
+			@RequestBody @Valid RequestWrapper<JWSSignatureRequestDto> requestDto) {
+		JWTSignatureResponseDto signatureResponse = service.jwsSign(requestDto.getRequest());
+		ResponseWrapper<JWTSignatureResponseDto> response = new ResponseWrapper<>();
 		response.setResponse(signatureResponse);
 		return response;
 	}

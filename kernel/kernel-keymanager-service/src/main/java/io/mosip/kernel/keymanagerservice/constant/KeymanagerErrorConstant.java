@@ -47,7 +47,7 @@ public enum KeymanagerErrorConstant {
 
 	SYMMETRIC_KEY_DECRYPTION_FAILED("KER-KMS-019", "Not able to decrypt Symmetric Key using the Private Key."),
 
-	NOT_VALID_SIGNATURE_KEY("KER-KMS-020", "Signing operation for allowed for the provided application id & reference id."),
+	NOT_VALID_SIGNATURE_KEY("KER-KMS-020", "Signing operation not allowed for the provided application id & reference id."),
 
 	MORE_THAN_ONE_KEY_FOUND("KER-KMS-023", "More than one key alias found for the provided thumbprint."),
 
