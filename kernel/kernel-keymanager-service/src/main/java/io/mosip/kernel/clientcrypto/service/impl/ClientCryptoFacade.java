@@ -130,13 +130,32 @@ public class ClientCryptoFacade {
     }
 
     public byte[] decrypt(byte[] dataToDecrypt) {
-        Assert.assertNotNull(getClientSecurity());
+        try {
+            Objects.requireNonNull(getClientSecurity());
+            byte[] encryptedSecretKey = Arrays.copyOfRange(dataToDecrypt, 0, symmetricKeyLength);
+            byte[] secretKeyBytes = getClientSecurity().asymmetricDecrypt(encryptedSecretKey);
+            byte[] iv = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength, symmetricKeyLength+ivLength);
+            byte[] aad = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength + ivLength, symmetricKeyLength+ivLength+aadLength);
+            byte[] cipher = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength + ivLength + aadLength,
+                    dataToDecrypt.length);
+
+            SecretKey secretKey = new SecretKeySpec(secretKeyBytes, "AES");
+            return cryptoCore.symmetricDecrypt(secretKey, cipher, iv, aad);
+        } catch (Exception e) {
+            LOGGER.debug("Failed to decrypt data", e);
+        }
+        return backwardCompatibleDecrypt(dataToDecrypt);
+    }
+
+    private byte[] backwardCompatibleDecrypt(byte[] dataToDecrypt) {
+        int IV = 16;
+        int AAD = 12;
+        Objects.requireNonNull(getClientSecurity());
         byte[] encryptedSecretKey = Arrays.copyOfRange(dataToDecrypt, 0, symmetricKeyLength);
         byte[] secretKeyBytes = getClientSecurity().asymmetricDecrypt(encryptedSecretKey);
-        byte[] iv = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength, symmetricKeyLength+ivLength);
-        byte[] aad = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength + ivLength, symmetricKeyLength+ivLength+aadLength);
-        byte[] cipher = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength + ivLength + aadLength,
-                dataToDecrypt.length);
+        byte[] iv = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength, symmetricKeyLength + IV);
+        byte[] aad = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength + IV, symmetricKeyLength + IV + AAD);
+        byte[] cipher = Arrays.copyOfRange(dataToDecrypt, symmetricKeyLength + IV + AAD, dataToDecrypt.length);
 
         SecretKey secretKey = new SecretKeySpec(secretKeyBytes, "AES");
         return cryptoCore.symmetricDecrypt(secretKey, cipher, iv, aad);
