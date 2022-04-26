@@ -26,9 +26,9 @@ public class ClientCryptoManagerServiceImpl implements ClientCryptoManagerServic
     @Override
     public TpmSignResponseDto csSign(TpmSignRequestDto tpmSignRequestDto) {
         byte[] signedData = clientCryptoFacade.getClientSecurity().signData(
-                ClientCryptoUtils.decodeBase64Data(tpmSignRequestDto.getData()));
+                CryptoUtil.decodeBase64(tpmSignRequestDto.getData()));
         TpmSignResponseDto tpmSignResponseDto = new TpmSignResponseDto();
-        tpmSignResponseDto.setData(CryptoUtil.encodeToURLSafeBase64(signedData));
+        tpmSignResponseDto.setData(CryptoUtil.encodeBase64(signedData));
         return tpmSignResponseDto;
     }
 
@@ -51,7 +51,7 @@ public class ClientCryptoManagerServiceImpl implements ClientCryptoManagerServic
                 ClientCryptoUtils.decodeBase64Data(tpmCryptoRequestDto.getPublicKey()),
                 ClientCryptoUtils.decodeBase64Data(tpmCryptoRequestDto.getValue()));
         TpmCryptoResponseDto tpmCryptoResponseDto = new TpmCryptoResponseDto();
-        tpmCryptoResponseDto.setValue(CryptoUtil.encodeToURLSafeBase64(cipher));
+        tpmCryptoResponseDto.setValue(CryptoUtil.encodeBase64(cipher));
         return tpmCryptoResponseDto;
     }
 
@@ -59,14 +59,14 @@ public class ClientCryptoManagerServiceImpl implements ClientCryptoManagerServic
     public TpmCryptoResponseDto csDecrypt(TpmCryptoRequestDto tpmCryptoRequestDto) {
         byte[] plainData = clientCryptoFacade.decrypt(ClientCryptoUtils.decodeBase64Data(tpmCryptoRequestDto.getValue()));
         TpmCryptoResponseDto tpmCryptoResponseDto = new TpmCryptoResponseDto();
-        tpmCryptoResponseDto.setValue(CryptoUtil.encodeToURLSafeBase64(plainData));
+        tpmCryptoResponseDto.setValue(CryptoUtil.encodeBase64(plainData));
         return tpmCryptoResponseDto;
     }
 
     @Override
     public PublicKeyResponseDto getSigningPublicKey(PublicKeyRequestDto publicKeyRequestDto) {
         PublicKeyResponseDto publicKeyResponseDto = new PublicKeyResponseDto();
-        publicKeyResponseDto.setPublicKey(CryptoUtil.encodeToURLSafeBase64(clientCryptoFacade.getClientSecurity().
+        publicKeyResponseDto.setPublicKey(CryptoUtil.encodeBase64(clientCryptoFacade.getClientSecurity().
                 getSigningPublicPart()));
         return publicKeyResponseDto;
     }
@@ -74,7 +74,7 @@ public class ClientCryptoManagerServiceImpl implements ClientCryptoManagerServic
     @Override
     public PublicKeyResponseDto getEncPublicKey(PublicKeyRequestDto publicKeyRequestDto) {
         PublicKeyResponseDto publicKeyResponseDto = new PublicKeyResponseDto();
-        publicKeyResponseDto.setPublicKey(CryptoUtil.encodeToURLSafeBase64(clientCryptoFacade.getClientSecurity().
+        publicKeyResponseDto.setPublicKey(CryptoUtil.encodeBase64(clientCryptoFacade.getClientSecurity().
                 getEncryptionPublicPart()));
         return publicKeyResponseDto;
     }
