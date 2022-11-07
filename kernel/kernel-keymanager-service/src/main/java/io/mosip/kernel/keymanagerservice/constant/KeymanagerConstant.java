@@ -180,4 +180,6 @@ public class KeymanagerConstant {
 	public static final String KERNEL_APP_ID = "KERNEL";
 
 	public static final String KERNEL_IDENTIFY_CACHE = "IDENTITY_CACHE";
+
+	public static final String COMPONENT_MASTER_KEY_DUMMY_REF = "COMP_MASTER";
 }
