@@ -51,7 +51,7 @@ public enum KeymanagerErrorConstant {
 
 	MORE_THAN_ONE_KEY_FOUND("KER-KMS-023", "More than one key alias found for the provided thumbprint."),
 
-	APP_ID_REFERENCE_ID_NOT_MATCHING("KER-KMS-024", "Application Id & Reference Id not matching with the inputted thumbprint."),
+	APP_ID_REFERENCE_ID_NOT_MATCHING("KER-KMS-024", "Application Id & Reference Id not matching with the input thumbprint."),
 
 	INTERNAL_SERVER_ERROR("KER-KMS-500", "Internal server error");
 
