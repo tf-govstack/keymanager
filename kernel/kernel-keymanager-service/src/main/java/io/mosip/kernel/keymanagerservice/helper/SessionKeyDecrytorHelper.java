@@ -140,16 +140,22 @@ public class SessionKeyDecrytorHelper {
 		io.mosip.kernel.keymanagerservice.entity.KeyStore dbKeyStore = cacheKeyStore.getOrDefault(certThumbprintHex, null);
 
 		String appIdRefIdKey = applicationId + KeymanagerConstant.HYPHEN + referenceId;
+		String compMasterKeyRefId = applicationId + KeymanagerConstant.HYPHEN + KeymanagerConstant.COMPONENT_MASTER_KEY_DUMMY_REF; 
 		if(Objects.isNull(dbKeyStore)) {
 			dbKeyStore = dbHelper.getKeyAlias(certThumbprintHex, appIdRefIdKey);
 			cacheKeyStore.put(certThumbprintHex, dbKeyStore);
-			cacheReferenceIds.put(certThumbprintHex, appIdRefIdKey);
+			// Added condition to handle issue related to decryption error with Master key.
+			if (Objects.isNull(dbKeyStore.getPrivateKey())) {
+				cacheReferenceIds.put(certThumbprintHex, compMasterKeyRefId);
+			} else {
+				cacheReferenceIds.put(certThumbprintHex, appIdRefIdKey);
+			}
 		}
 
 		String cachedRefId = cacheReferenceIds.getOrDefault(certThumbprintHex, null);
-		if (!appIdRefIdKey.equals(cachedRefId)){
+		if (!appIdRefIdKey.equals(cachedRefId) && !compMasterKeyRefId.equals(cachedRefId)){
             LOGGER.error(KeymanagerConstant.SESSIONID, KeymanagerConstant.EMPTY, KeymanagerConstant.EMPTY,
-                "Application Id & Reference ID not matching with the inputted thumbprint value(decrypt).");
+                "Application Id & Reference ID not matching with the input thumbprint value(decrypt).");
             throw new KeymanagerServiceException(KeymanagerErrorConstant.APP_ID_REFERENCE_ID_NOT_MATCHING.getErrorCode(),
                 KeymanagerErrorConstant.APP_ID_REFERENCE_ID_NOT_MATCHING.getErrorMessage());
         }

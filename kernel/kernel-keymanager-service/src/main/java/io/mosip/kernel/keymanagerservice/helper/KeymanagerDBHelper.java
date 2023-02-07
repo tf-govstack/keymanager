@@ -234,9 +234,11 @@ public class KeymanagerDBHelper {
         }
         // Duplicate check required because before cacheing comparison of app id & reference id is required.
         String idKey = keyAliases.get(0).getApplicationId() + KeymanagerConstant.HYPHEN + keyAliases.get(0).getReferenceId();
-        if (!idKey.equals(appIdRefIdKey)){
+        // Checking for master key is used during encryption time. 
+        String idCompMasterKey = keyAliases.get(0).getApplicationId() + KeymanagerConstant.HYPHEN;
+        if (!idKey.equals(appIdRefIdKey) && !idCompMasterKey.equals(idKey)){
             LOGGER.error(KeymanagerConstant.SESSIONID, KeymanagerConstant.EMPTY, KeymanagerConstant.EMPTY,
-                "AppId & Reference Id not matching with the inputted thumbprint value(helper).");
+                "AppId & Reference Id not matching with the input thumbprint value(helper).");
             throw new KeymanagerServiceException(KeymanagerErrorConstant.APP_ID_REFERENCE_ID_NOT_MATCHING.getErrorCode(),
                 KeymanagerErrorConstant.APP_ID_REFERENCE_ID_NOT_MATCHING.getErrorMessage());
         }
